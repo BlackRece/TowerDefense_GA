@@ -9,10 +9,14 @@
 using namespace std;
 
 /*
-* DNA = a list of towers, each with a position
+* Population -> Chromosomes -> DNA -> Genes 
+* A Population has a group of Chromosomes,
+* A Chromosome has a group of DNA
+* A DNA has a score, a kills counter and a group of Genes
+* A Gene has a tower, a position and a spawn delay
 * 
-	1) generate population: a list of DNA
-	2) evaluate population: run the game with each DNA
+	1) generate chromosome: a list of DNA
+	2) evaluate chromosome: run the game with each DNA
 	3) select fittest: select the best DNA
 */
 
@@ -23,8 +27,12 @@ AIController::AIController()
 	m_Timer = nullptr;
 	m_gameState = nullptr;
 
-	srand(NUM_TOWERS);
-	CreatePopulation(NUM_TOWERS);
+	m_DNAIndex = 0;
+	m_chromoIndex = 0;
+	m_geneIndex = 0;
+
+	srand(DNA_PER_CHROMOSOME * GENES_PER_DNA * MAX_COL * MAX_ROW * SPAWN_DELAY);
+	CreatePopulation();
 }
 
 AIController::~AIController()
@@ -34,14 +42,21 @@ AIController::~AIController()
 
 void AIController::gameOver()
 {
+	// update DNA
+	DNA dna = m_chromos[m_chromoIndex];
+	dna.m_score = recordScore();
+	dna.m_kills = m_gameState->getMonsterEliminated();
+	dna.m_duration = floor(m_Timer->elapsedSeconds());
+	
+	// select next chromosome
+	if(m_chromoIndex < m_chromos.size())
+		m_chromoIndex++;
 }
 
 void AIController::update()
 {
 	if (m_Timer == nullptr)
 		return;
-
-	DNA2* dna = new DNA2();
 
 	// HINT
 	// a second has elapsed - your GA manager (GA Code) may decide to do something at this time...
@@ -53,12 +68,13 @@ void AIController::update()
 
 	}
 
-	if (elapsedSeconds >= dna->m_spawnDelay)
+	Gene* gene = m_chromos[m_chromoIndex].m_genes[m_DNAIndex];
+	if (elapsedSeconds >= gene->m_spawnDelay)
 	{
-		bool wasTowerAdded = addTower(dna->m_towerType, dna->m_towerPosition.x, dna->m_towerPosition.y);
-		dna->m_score = wasTowerAdded ? 1 : -10;
-
+		bool wasTowerAdded = addTower(gene->m_towerType, gene->m_towerPosition.x, gene->m_towerPosition.y);
+		gene->m_score = wasTowerAdded ? 1 : -10;
 	}
+	
 	//GAManager::Instance()->Update(m_Timer->elapsedSeconds());
 
 	// this might be useful? Monsters killed
@@ -117,24 +133,19 @@ int AIController::recordScore()
 	return score;
 }
 
-void AIController::CreatePopulation(int numTowers)
+void AIController::CreatePopulation()
 {
-	for (int i = 0; i < numTowers; i++)	
-	{
-		m_population.push_back(CreateDNA());
-		//m_towerTypes.push_back((TowerType)(rand() % 3 + 1));
-		//m_towerPositions.push_back(sf::Vector2f(rand() % MAX_COL, rand() % MAX_ROW));
+	for (int j = 0; j < DNA_PER_CHROMOSOME; j++)
+	{ 
+		DNA dna;
+		dna.m_kills = 0;
+		dna.m_score = 0;
+		
+		for (int i = 0; i < GENES_PER_DNA; i++)	
+		{
+			dna.m_genes.push_back(new Gene());
+		}
+		
+		m_chromos.push_back(dna);
 	}
-}
-
-DNA AIController::CreateDNA()
-{
-	DNA dna;
-	for (int i = 0; i < NUM_TOWERS; i++)
-	{
-		dna.m_towerTypes.push_back((TowerType)(rand() % 3 + 1));
-		dna.m_towerPositions.push_back(sf::Vector2f(rand() % MAX_COL, rand() % MAX_ROW));
-	}
-	dna.m_score = 0;
-	return dna;
 }
