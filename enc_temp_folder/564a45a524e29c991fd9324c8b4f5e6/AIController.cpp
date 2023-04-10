@@ -32,10 +32,7 @@ AIController::AIController()
 	m_geneIndex = 0;
 	m_generation = 0;
 
-	std::chrono::system_clock::time_point tp = std::chrono::system_clock::now();
-	std::chrono::system_clock::duration dtn = tp.time_since_epoch();
-
-	randomSeed(dtn.count());
+	randomSeed(DNA_PER_CHROMOSOME * GENES_PER_DNA * MAX_COL * MAX_ROW * SPAWN_DELAY);
 	m_chromos = CreatePopulation(DNA_PER_CHROMOSOME);
 }
 
@@ -55,13 +52,6 @@ void AIController::gameOver()
 		dna->m_duration = floor(m_Timer->elapsedSeconds());
 		dna->m_score = recordScore();
 	
-		// check score 
-		if (dna->m_score >= 100)
-			cout << "\nHalf way score = " << dna->m_score;
-
-		if (dna->m_score >= 200)
-			cout << "\nTarget score = " << dna->m_score;
-
 		// select next chromosome
 		m_chromoIndex++;
 
