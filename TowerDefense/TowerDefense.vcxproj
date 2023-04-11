@@ -132,6 +132,7 @@
   <ItemGroup>
     <ClInclude Include="AIController.h" />
     <ClInclude Include="Clickable.h" />
+    <ClInclude Include="GAManager.h" />
     <ClInclude Include="Tower.h" />
     <ClInclude Include="TowerAndMonsterController.h" />
     <ClInclude Include="TowerButton.h" />
@@ -149,6 +150,7 @@
   <ItemGroup>
     <ClCompile Include="AIController.cpp" />
     <ClCompile Include="Clickable.cpp" />
+    <ClCompile Include="GAManager.cpp" />
     <ClCompile Include="Tower.cpp" />
     <ClCompile Include="TowerAndMonsterController.cpp" />
     <ClCompile Include="TowerButton.cpp" />
