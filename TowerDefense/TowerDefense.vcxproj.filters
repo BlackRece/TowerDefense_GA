@@ -46,6 +46,11 @@
     <ClCompile Include="GAManager.cpp">
       <Filter>AI Code</Filter>
     </ClCompile>
+    <ClCompile Include="Gene.cpp">
+      <Filter>AI Code</Filter>
+    </ClCompile>
+    <ClCompile Include="DNA.cpp" />
+    <ClCompile Include="Pos.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Clickable.h">
@@ -96,6 +101,11 @@
     <ClInclude Include="GAManager.h">
       <Filter>AI Code</Filter>
     </ClInclude>
+    <ClInclude Include="Gene.h">
+      <Filter>AI Code</Filter>
+    </ClInclude>
+    <ClInclude Include="DNA.h" />
+    <ClInclude Include="Pos.h" />
   </ItemGroup>
   <ItemGroup>
     <Filter Include="Game Headers">

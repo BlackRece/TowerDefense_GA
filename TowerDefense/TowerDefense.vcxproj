@@ -132,7 +132,10 @@
   <ItemGroup>
     <ClInclude Include="AIController.h" />
     <ClInclude Include="Clickable.h" />
+    <ClInclude Include="DNA.h" />
     <ClInclude Include="GAManager.h" />
+    <ClInclude Include="Gene.h" />
+    <ClInclude Include="Pos.h" />
     <ClInclude Include="Tower.h" />
     <ClInclude Include="TowerAndMonsterController.h" />
     <ClInclude Include="TowerButton.h" />
@@ -150,7 +153,10 @@
   <ItemGroup>
     <ClCompile Include="AIController.cpp" />
     <ClCompile Include="Clickable.cpp" />
+    <ClCompile Include="DNA.cpp" />
     <ClCompile Include="GAManager.cpp" />
+    <ClCompile Include="Gene.cpp" />
+    <ClCompile Include="Pos.cpp" />
     <ClCompile Include="Tower.cpp" />
     <ClCompile Include="TowerAndMonsterController.cpp" />
     <ClCompile Include="TowerButton.cpp" />
