@@ -67,8 +67,6 @@ void AIController::update()
 		case Position: m_GAManager->nextGene();
 		case Cost: /* Do nothing and try again once funds available */ break;
 	}
-	//if (wasPlaced)
-	//	m_GAManager->markGene();
 	
 	//GAManager::Instance()->Update(m_Timer->elapsedSeconds());
 	
