@@ -21,6 +21,16 @@ DNA* DNA::copy()
 	return dna;
 }
 
+DNA* DNA::reverse()
+{
+	DNA* dna = new DNA();
+
+	for (int i = m_genes.size() - 1; i >= 0 ; i--)
+		dna->m_genes.push_back(m_genes[i]);
+	
+	return dna;
+}
+
 DNA* DNA::setHigh() {
 	DNA* dna = new DNA();
 	dna->m_score = RAND_MAX;
@@ -31,6 +41,24 @@ DNA* DNA::setHigh() {
 
 std::tuple<DNA*, DNA*> DNA::crossover(DNA& dnaA, DNA& dnaB, int step)
 {
+	/*if (dnaA.m_genes.size() < GENES_PER_DNA)
+	{
+		std::string msg = 
+			"DNA::crossover() - dnaA has less than " 
+			+ std::to_string(GENES_PER_DNA)
+			+ " genes.";
+		throw std::exception(msg.c_str());
+	}
+	
+	if (dnaB.m_genes.size() < GENES_PER_DNA)
+	{
+		std::string msg =
+			"DNA::crossover() - dnaB has less than "
+			+ std::to_string(GENES_PER_DNA)
+			+ " genes.";
+		throw std::exception(msg.c_str());
+	}*/
+		
 	DNA* dna1 = new DNA();
 	DNA* dna2 = new DNA();
 
@@ -42,13 +70,29 @@ std::tuple<DNA*, DNA*> DNA::crossover(DNA& dnaA, DNA& dnaB, int step)
 
 		if (bFlip)
 		{
-			dna1->m_genes.push_back(dnaA.m_genes[i]);
-			dna2->m_genes.push_back(dnaB.m_genes[i]);
+			dna1->m_genes.push_back(
+				dnaA.m_genes.size() < i + 1
+				? new Gene()
+				: dnaA.m_genes[i]
+			);
+			dna2->m_genes.push_back(
+				dnaB.m_genes.size() < i + 1
+				? new Gene()
+				: dnaB.m_genes[i]
+			);
 		}
 		else
 		{
-			dna1->m_genes.push_back(dnaB.m_genes[i]);
-			dna2->m_genes.push_back(dnaA.m_genes[i]);
+			dna1->m_genes.push_back(
+				dnaB.m_genes.size() < i + 1
+				? new Gene()
+				: dnaB.m_genes[i]
+			);
+			dna2->m_genes.push_back(
+				dnaA.m_genes.size() < i + 1
+				? new Gene()
+				: dnaA.m_genes[i]
+			);
 		}
 	}
 
@@ -59,10 +103,10 @@ bool DNA::isGreaterThan(DNA& dna)
 {
 	if (m_score == dna.m_score)
 	{
-		if (m_duration == dna.m_duration)
-			return m_kills > dna.m_kills;
-		else
+		if (m_kills == dna.m_kills)
 			return m_duration > dna.m_duration;
+		else
+			return m_kills > dna.m_kills;
 	}
 	return m_score > dna.m_score;
 }
@@ -72,7 +116,7 @@ bool DNA::isEqualTo(DNA& dna)
 	if (m_genes.size() != dna.m_genes.size())
 		return false;
 
-	for (int i = 0; i < GENES_PER_DNA; i++)
+	for (int i = 0; i < m_genes.size(); i++)
 	{
 		if (m_genes[i]->m_towerType != dna.m_genes[i]->m_towerType)
 			return false;
@@ -86,7 +130,7 @@ bool DNA::isEqualTo(DNA& dna)
 void DNA::fillGenes()
 {
 	for (int i = 0; i < GENES_PER_DNA; i++)
-		m_genes.push_back(new Gene());
+		m_genes.push_back(getUniqueGene());
 }
 
 bool DNA::nextGene()
@@ -105,9 +149,39 @@ void DNA::mutateGene(float fPercent)
 {
 	for (Gene* gene : m_genes)
 	{
-		if ((rand() % 100) < fPercent)
-			gene->mutate();
+		if ((rand() % 100) <= fPercent)
+			gene = getUniqueGene();
 	}
+}
+
+Gene* DNA::getUniqueGene()
+{
+	Gene* newGene = new Gene();
+	bool isUnique = false;
+
+	while (isUnique == false)
+	{
+		// set flag
+		isUnique = true;
+
+		// for each gene
+		for (Gene* gene : m_genes)
+		{
+			// check for dupicates
+			if (gene->m_towerPosition == newGene->m_towerPosition)
+			{
+				// if duplicated, set flag
+				isUnique = false;
+				break;
+			}
+		}
+
+		// if duplicated flag was set, get new position
+		if (!isUnique)
+			newGene = new Gene();
+	}
+
+	return newGene;
 }
 
 void DNA::DebugReport()

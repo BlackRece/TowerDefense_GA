@@ -29,7 +29,6 @@ void GAManager::nextGene()
 
 void GAManager::nextDNA()
 {
-
 	if (m_index + 1 >= m_chromos.size())
 	{
 		nextGeneration();
@@ -55,22 +54,45 @@ void GAManager::nextGeneration()
 {
 	DebugReport();
 
-	// Selection: select the best chromosomes (aka Elite/Ranked Selection)
-	std::vector<DNA*> vecSelected = selection();
-	
-	// Mating Pool: create chromosome pool from selected chromosomes
-	//std::vector<DNA*> vecMatingPool = matingPool(vecSelected);
-	std::vector<DNA*> vecMatingPool = fastMatingPool(vecSelected);
-	
-	// Crossover: create new chromosomes from selected chromosomes
-	std::vector<DNA*> vecCrossed = crossover(vecMatingPool, CROSSOVER_STEP);
+	if (USE_ELITE)
+	{
+		// Selection: select the best chromosomes (aka Elite/Ranked Selection)
+		std::tuple<DNA*, std::vector<DNA*>> selectionResult = selection_elite();
+		DNA* eliteDNA = std::get<0>(selectionResult);
+		std::vector<DNA*> vecSelected = std::get<1>(selectionResult);
 
-	// Mutation: mutate crossed chromosomes using a mutation percentage
-	m_chromos = mutation(vecCrossed, MUTATION_PERCENTAGE);
+		// Mating Pool: create chromosome pool from selected chromosomes
+		// std::vector<DNA*> vecMatingPool = matingPool(vecSelected);
+		std::vector<DNA*> vecMatingPool = fastMatingPool(vecSelected);
+
+		// Crossover: create new chromosomes from selected chromosomes
+		std::vector<DNA*> vecCrossed = crossoverWithParent(*eliteDNA, vecMatingPool, CROSSOVER_STEP);
+
+		// Mutation: mutate crossed chromosomes using a mutation percentage
+		m_chromos = mutation(vecCrossed, MUTATION_PERCENTAGE);
+
+		// add elite dna 
+		m_chromos.push_back(eliteDNA);
+		m_chromos.push_back(eliteDNA->reverse());
+	}
+	else
+	{
+		// Selection: select the best chromosomes (aka Elite/Ranked Selection)
+		std::vector<DNA*> vecSelected = selection_rank();
+		
+		// Mating Pool: create chromosome pool from selected chromosomes
+		// std::vector<DNA*> vecMatingPool = matingPool(vecSelected);
+		std::vector<DNA*> vecMatingPool = fastMatingPool(vecSelected);
+
+		// Crossover: create new chromosomes from selected chromosomes
+		std::vector<DNA*> vecCrossed = crossover(vecMatingPool, CROSSOVER_STEP);
+
+		// Mutation: mutate crossed chromosomes using a mutation percentage
+		m_chromos = mutation(vecCrossed, MUTATION_PERCENTAGE);
+	}
 
 	// Reset: prepare for next generation
 	reset();
-
 }
 
 void GAManager::createPopulation(int dnaCount)
@@ -109,6 +131,41 @@ int GAManager::findPlacedIndex(sf::Vector2f pos)
 	return -1;
 }
 
+int GAManager::findDNAIndex(DNA& target, std::vector<DNA*> vecSource) {
+	for (int i = 0; i < vecSource.size(); i++)
+	{
+		if (target.isEqualTo(*vecSource[i]))
+			return i;
+	}
+	return -1;
+}
+
+DNA* GAManager::findBestDNA(std::vector<DNA*> vecSource)
+{
+	DNA* bestDNA = new DNA();
+
+	for (DNA* dna : vecSource)
+	{
+		// if copy dna with the higher fitness score
+		if (bestDNA->isLesserThan(*dna) && !bestDNA->isEqualTo(*dna))
+			bestDNA = dna->copy();
+	}
+
+	return bestDNA;
+}
+
+bool GAManager::isUnique(DNA& target, std::vector<DNA*>& vecSource)
+{
+	// if target is in list, the not unique
+	for (DNA* dna : vecSource)
+	{
+		if (target.isEqualTo(*dna))
+			return false;
+	}
+
+	return true;
+}
+
 std::vector<DNA*> GAManager::matingPool(std::vector<DNA*>& vecSelected)
 {
 	std::vector<DNA*> vecMatingPool;
@@ -139,7 +196,54 @@ std::vector<DNA*> GAManager::fastMatingPool(std::vector<DNA*>& vecSelected)
 	return vecMatingPool;
 }
 
-std::vector<DNA*> GAManager::selection()
+std::tuple<DNA*, std::vector<DNA*>> GAManager::selection_elite()
+{
+	// copy chromos list 
+	std::vector<DNA*> vecCopiedChromos = m_chromos;
+
+	// select ELITE dna from copied chromos list
+	DNA* eliteDNA = findBestDNA(m_chromos);
+
+	// remove best dna from copied chromos list
+	int bestIndex = findDNAIndex(*eliteDNA, vecCopiedChromos);
+	vecCopiedChromos.erase(vecCopiedChromos.begin() + bestIndex);
+
+	// split copied chromos into 3 groups
+	std::vector<DNA*> vecFirst, vecSecond, vecThird;
+	/*for (int i = 0; i < vecCopiedChromos.size() - 1; i += 3)
+	{
+		vecFirst.push_back(vecCopiedChromos[i]);
+		vecSecond.push_back(vecCopiedChromos[i + 1]);
+		vecThird.push_back(vecCopiedChromos[i + 2]);
+	}*/
+	for (DNA* dna : vecCopiedChromos)
+	{
+		if (vecFirst.size() <= 3)
+			vecFirst.push_back(dna);
+		else if (vecSecond.size() <= 3)
+			vecSecond.push_back(dna);
+		else if (vecThird.size() <= 3)
+			vecThird.push_back(dna);
+	}
+
+	// select the best from each grouping
+	DNA* firstDNA = findBestDNA(vecFirst);
+	DNA* secondDNA = findBestDNA(vecSecond);
+	DNA* thirdDNA = findBestDNA(vecThird);
+
+	// store selected DNA into single array
+	std::vector<DNA*> vecBestChromos;
+	//vecBestChromos.push_back(eliteDNA);
+	vecBestChromos.push_back(eliteDNA->reverse());
+	vecBestChromos.push_back(firstDNA);
+	vecBestChromos.push_back(secondDNA);
+	vecBestChromos.push_back(thirdDNA);
+
+	// return result
+	return std::make_tuple(eliteDNA, vecBestChromos);
+}
+
+std::vector<DNA*> GAManager::selection_rank()
 {
 	// no. of best chromosomes to select
 	int iBestCount = DNA_PER_CHROMOSOME / 2;
@@ -184,10 +288,26 @@ std::vector<DNA*> GAManager::crossover(std::vector<DNA*>& vecMatingPool, int ste
 	
 	for (int i = 0; i < floor(iMatingCount / 2); i++)
 	{
-		DNA* dnaA = vecMatingPool[rand() % iMatingCount];
-		DNA* dnaB = vecMatingPool[rand() % iMatingCount];
+		DNA* dnaA = vecMatingPool[i];
+		DNA* dnaB = vecMatingPool[i+1];
 
 		std::tuple<DNA*, DNA*> offspring = DNA::crossover(*dnaA, *dnaB, step);
+		vecOffSpring.push_back(std::get<0>(offspring));
+		vecOffSpring.push_back(std::get<1>(offspring));
+	}
+
+	return vecOffSpring;
+}
+
+std::vector<DNA*> GAManager::crossoverWithParent(DNA& parent, std::vector<DNA*>& vecMatingPool, int step)
+{
+	std::vector<DNA*> vecOffSpring;
+
+	for (int i = 0; i < floor(DNA_PER_CHROMOSOME / 2); i++)
+	{
+		DNA* dna = vecMatingPool[i];
+
+		std::tuple<DNA*, DNA*> offspring = DNA::crossover(parent, *dna, step);
 		vecOffSpring.push_back(std::get<0>(offspring));
 		vecOffSpring.push_back(std::get<1>(offspring));
 	}

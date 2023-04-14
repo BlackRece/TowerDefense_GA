@@ -9,8 +9,8 @@
 
 constexpr int DNA_PER_CHROMOSOME = 10;
 constexpr int CROSSOVER_STEP = 5;
-constexpr float MUTATION_PERCENTAGE = 1.0f;	// 1.0f = 1.0%
-
+constexpr float MUTATION_PERCENTAGE = 5.0f;	// 1.0f = 1.0%
+constexpr bool USE_ELITE = true;
 class GAManager
 {
 public:
@@ -38,12 +38,17 @@ private:
 	int getRandomIndex(std::vector<DNA*>& source);
 	int findPlacedIndex(sf::Vector2f pos);
 
+	int findDNAIndex(DNA& target, std::vector<DNA*> vecSource);
+	DNA* findBestDNA(std::vector<DNA*> vecSource);
+	bool isUnique(DNA& target, std::vector<DNA*>& vecSource);
 
 	std::vector<DNA*> matingPool(std::vector<DNA*>& vecSelected);
 	std::vector<DNA*> fastMatingPool(std::vector<DNA*>& vecSelected);
 
-	std::vector<DNA*> selection();
+	std::tuple<DNA*, std::vector<DNA*>> selection_elite();
+	std::vector<DNA*> selection_rank();
 	std::vector<DNA*> crossover(std::vector<DNA*>& vecMatingPool, int step);
+	std::vector<DNA*> crossoverWithParent(DNA& parent, std::vector<DNA*>& vecMatingPool, int step);
 	std::vector<DNA*> mutation(std::vector<DNA*>& vecCrossed, float fPercent);
 
 	void reset();

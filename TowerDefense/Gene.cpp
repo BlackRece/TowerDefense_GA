@@ -16,8 +16,6 @@ void Gene::copy(Gene& gene)
 
 void Gene::mutate()
 {
-	if (m_isPlaced)
-		m_towerType = getRandomTower();
-	else
-		m_towerPosition = getRandomPosition();
+	m_towerType = getRandomTower();
+	m_towerPosition = getRandomPosition();
 }

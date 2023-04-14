@@ -51,6 +51,10 @@
     </ClCompile>
     <ClCompile Include="DNA.cpp" />
     <ClCompile Include="Pos.cpp" />
+    <ClCompile Include="JsonParser.h">
+      <Filter>AI Code</Filter>
+    </ClCompile>
+    <ClCompile Include="JsonParser.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Clickable.h">
@@ -117,5 +121,8 @@
     <Filter Include="AI Code">
       <UniqueIdentifier>{09d177bd-c1df-4e4e-857f-fb10307d7636}</UniqueIdentifier>
     </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="packages.config" />
   </ItemGroup>
 </Project>
