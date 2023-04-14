@@ -2,6 +2,8 @@
 #ifndef JSONPARSER_H
 #define JSONPARSER_H
 
+#include <iostream>
+#include <fstream>
 #include <nlohmann/json.hpp>
 using json = nlohmann::json;
 
@@ -32,13 +34,14 @@ static void JsonParser::LoadJson(std::vector<t>& structData, std::string inputfi
 }
 
 template<typename t>
-static void JsonParser::SaveJson(std::vector<t> structData, std::string inputfile)
+static void JsonParser::SaveJson(std::vector<t> structData, std::string outputfile)
 {
 	try
 	{
 		json jsonData = structData;
-		std::ofstream o(inputfile);
-		o << std::setw(4) << jsonData << std::endl;
+		std::ofstream o(outputfile);
+		o << jsonData.dump(2) << std::endl;
+		//o << std::setw(4) << jsonData << std::endl;
 	}
 	catch (const std::exception) {}
 }
@@ -62,7 +65,8 @@ static void JsonParser::SaveJson(t structData, std::string inputfile)
 	{
 		json jsonData = structData;
 		std::ofstream o(inputfile);
-		o << std::setw(4) << jsonData << std::endl;
+		o << jsonData.dump(2) << std::endl;
+		//o << std::setw(4) << jsonData << std::endl;
 	}
 	catch (const std::exception) {}
 }

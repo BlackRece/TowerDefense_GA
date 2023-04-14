@@ -13,7 +13,7 @@ using namespace std;
 typedef sf::IntRect* srcArrayPtr;
 
 enum class TowerType {
-	empty, slammer, swinger, thrower
+	empty = 0, slammer = 1, swinger = 2, thrower = 3
 };
 
 class Tower: public Clickable {

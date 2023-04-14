@@ -5,8 +5,19 @@
 #include "Gene.h"
 #include <vector>
 #include <string>
+#include <nlohmann/json.hpp>
 
 constexpr int GENES_PER_DNA = 40;
+
+struct DNAJson
+{
+	std::vector<GeneJson> m_genes;
+	int m_score;
+	int m_kills;
+	int m_duration;
+
+	NLOHMANN_DEFINE_TYPE_INTRUSIVE(DNAJson, m_genes, m_score, m_kills, m_duration);
+};
 
 class DNA
 {
@@ -34,11 +45,13 @@ public:
 	
 	void fillGenes();
 	inline Gene& getGene() { return *m_genes[m_index]; }
-	//inline Gene& getRandomGene() { return *m_genes[rand() % m_genes.size()]; }
 	bool nextGene();
 	void mutateGene(float fPercent);
 	Gene* getUniqueGene();
 	
+	DNAJson getJson();
+	void setJson(DNAJson& json);
+
 	void DebugReport();
 	
 	std::vector<Gene*> m_genes;

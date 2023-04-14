@@ -19,3 +19,20 @@ void Gene::mutate()
 	m_towerType = getRandomTower();
 	m_towerPosition = getRandomPosition();
 }
+
+GeneJson Gene::getJson()
+{
+	GeneJson json
+	{
+		json.m_towerType = (int)m_towerType,
+		json.m_x = m_towerPosition.x,
+		json.m_y = m_towerPosition.y,
+	};
+	return json;
+}
+
+void Gene::setJson(GeneJson& json)
+{
+	m_towerType = (TowerType)json.m_towerType;
+	m_towerPosition = sf::Vector2f(json.m_x, json.m_y);
+}

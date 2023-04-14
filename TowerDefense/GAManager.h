@@ -6,11 +6,18 @@
 #include <vector>
 
 #include "DNA.h"
+#include <nlohmann/json.hpp>
+#include "JsonParser.h"
 
 constexpr int DNA_PER_CHROMOSOME = 10;
 constexpr int CROSSOVER_STEP = 5;
 constexpr float MUTATION_PERCENTAGE = 5.0f;	// 1.0f = 1.0%
 constexpr bool USE_ELITE = true;
+
+constexpr auto FILE_NAME = "chromos_";
+constexpr auto FILE_EXT = ".json";
+constexpr auto STORED_DNA_FILE_NAME = "chromos.json";
+
 class GAManager
 {
 public:
@@ -52,6 +59,9 @@ private:
 	std::vector<DNA*> mutation(std::vector<DNA*>& vecCrossed, float fPercent);
 
 	void reset();
+	
+	void loadChromosFromJson();
+	void saveChromosToJson();
 
 	void DebugReport();
 

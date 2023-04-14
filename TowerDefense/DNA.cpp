@@ -154,6 +154,33 @@ void DNA::mutateGene(float fPercent)
 	}
 }
 
+DNAJson DNA::getJson()
+{
+	DNAJson json;
+
+	json.m_score = m_score;
+	json.m_kills = m_kills;
+	json.m_duration = m_duration;
+
+	for (Gene* gene : m_genes)
+		json.m_genes.push_back(gene->getJson());
+
+	return json;
+}
+
+void DNA::setJson(DNAJson& json)
+{
+	m_score = json.m_score;
+	m_kills = json.m_kills;
+	m_duration = json.m_duration;
+	for (GeneJson geneJson : json.m_genes)
+	{
+		Gene* gene = new Gene();
+		gene->setJson(geneJson);
+		m_genes.push_back(gene);
+	}
+}
+
 Gene* DNA::getUniqueGene()
 {
 	Gene* newGene = new Gene();

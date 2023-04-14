@@ -5,9 +5,17 @@
 #include "Tower.h"
 #include <SFML/Graphics.hpp>
 #include <map>
+#include <nlohmann/json.hpp>
 
 constexpr int MAX_COL = 25;
 constexpr int MAX_ROW = 17;
+
+struct GeneJson
+{
+	int m_towerType;
+	float m_x, m_y;
+	NLOHMANN_DEFINE_TYPE_INTRUSIVE(GeneJson, m_towerType, m_x, m_y);
+};
 
 class Gene
 {
@@ -23,11 +31,13 @@ public:
 	
 	inline TowerType getRandomTower() { return (TowerType)(rand() % 3 + 1); }
 	
-	TowerType m_towerType;
-	sf::Vector2f m_towerPosition;
+	GeneJson getJson();
+	void setJson(GeneJson& json);
+
+	TowerType		m_towerType;
+	sf::Vector2f	m_towerPosition;
 
 private:
-	bool			m_isAnyPlaced;
 	bool			m_isPlaced;
 };
 

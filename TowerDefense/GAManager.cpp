@@ -7,7 +7,13 @@ GAManager::GAManager() : m_index(0), m_generation(0), m_isWaitingForNewGame(fals
 	std::chrono::system_clock::duration dtn = tp.time_since_epoch();
 	srand(dtn.count());
 
-	createPopulation(DNA_PER_CHROMOSOME);
+	// load population from json file
+	loadChromosFromJson();
+
+	// if no population was loaded, create initial population
+	if (m_chromos.size() < 1)
+		// create initial population
+		createPopulation(DNA_PER_CHROMOSOME);
 }
 
 void GAManager::markGene()
@@ -335,6 +341,42 @@ void GAManager::reset()
 	m_isWaitingForNewGame = false;
 }
 
+void GAManager::loadChromosFromJson()
+{
+	// load chromos from json file
+	std::vector<DNAJson> vecChromosJson;
+	JsonParser::LoadJson(vecChromosJson, STORED_DNA_FILE_NAME);
+
+	// convert json to dna
+	std::vector<DNA*> vecChromos;
+	for (DNAJson dnaJson : vecChromosJson)
+	{
+		DNA* dna = new DNA();
+		dna->setJson(dnaJson);
+		vecChromos.push_back(dna);
+	}
+
+	// set chromos
+	m_chromos = vecChromos;
+}
+
+void GAManager::saveChromosToJson()
+{
+	// generate vector of chromos to save as json
+	std::vector<DNAJson> vecChromosJson;
+	for (DNA* dna : m_chromos)
+	{
+		DNAJson dnaJson = dna->getJson();
+		vecChromosJson.push_back(dnaJson);
+	}
+
+	// build file name from generation count
+	std::string fileName = FILE_NAME + std::to_string(m_generation) + FILE_EXT;
+
+	// save chromos to json file
+	JsonParser::SaveJson(vecChromosJson, fileName);
+}
+
 void GAManager::DebugReport()
 {
 	cout
@@ -346,4 +388,7 @@ void GAManager::DebugReport()
 		cout << "\n\nChromosome: " << i;
 		m_chromos[i]->DebugReport();
 	}
+
+	// save chromos to json file
+	saveChromosToJson();
 }
